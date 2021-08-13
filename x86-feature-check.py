@@ -41,46 +41,45 @@ FLAG_NAMES = {
     'SSSE3': 'ssse3',
 } # type: Dict[str, Union[str, List[str]]]
 
-X86_64_REQUIRED_FEATURES = [
-    'CMOV',
-    'CMPXCHG8B',
-    'FPU',
-    'FXSR',
-    'MMX',
-    'SCE',
-    'SSE',
-    'SSE2',
-] # type: List[str]
-
-X86_64_V2_REQUIRED_FEATURES = [
-    'CMPXCHG16B',
-    'LAHF',
-    'POPCNT',
-    'SSE3',
-    'SSE4-1',
-    'SSE4-2',
-    'SSSE3',
-] # type: List[str]
-
-X86_64_V3_REQUIRED_FEATURES = [
-    'AVX',
-    'AVX2',
-    'BMI1',
-    'BMI2',
-    'F16C',
-    'FMA',
-    'LZCNT',
-    'MOVBE',
-    'OSXSAVE',
-] # type: List[str]
-
-X86_64_V4_REQUIRED_FEATURES = [
-    'AVX512BW',
-    'AVX512CD',
-    'AVX512DQ',
-    'AVX512F',
-    'AVX512VL',
-] # type: List[str]
+REQUIRED_FEATURES = {
+    'x86-64-v4': [
+        'AVX512BW',
+        'AVX512CD',
+        'AVX512DQ',
+        'AVX512F',
+        'AVX512VL',
+    ],
+    'x86-64-v3': [
+        'AVX',
+        'AVX2',
+        'BMI1',
+        'BMI2',
+        'F16C',
+        'FMA',
+        'LZCNT',
+        'MOVBE',
+        'OSXSAVE',
+    ],
+    'x86-64-v2': [
+        'CMPXCHG16B',
+        'LAHF',
+        'POPCNT',
+        'SSE3',
+        'SSE4-1',
+        'SSE4-2',
+        'SSSE3',
+    ],
+    'x86-64': [
+        'CMOV',
+        'CMPXCHG8B',
+        'FPU',
+        'FXSR',
+        'MMX',
+        'SCE',
+        'SSE',
+        'SSE2',
+    ],
+} # type: Dict[str, List[str]]
 
 
 def main() -> int:
@@ -167,7 +166,7 @@ def get_current_cpu_flags() -> Set[str]:
     return flags
 
 
-def has_feature(flags: Set[str], feature: str) -> bool:
+def supports_feature(flags: Set[str], feature: str) -> bool:
     """
     Checks if the given flags indicate support of a given feature.
 
@@ -197,49 +196,44 @@ def has_feature(flags: Set[str], feature: str) -> bool:
     return True in (flag in flags for flag in required_flags)
 
 
-def supports_feature_set(flags: Set[str], featureset: List[str]) -> bool:
+def supports_feature_set(flags: Set[str], feature_set: str) -> bool:
     """
     Checks if the given flags indicate support of a given feature set.
 
     :param flags: Set of flags to check for support of given feature set
     :type flags: set
 
-    :param featureset: Feature set to check support of
-    :type featureset: list
+    :param feature_set: Feature set to check support of
+    :type feature_set: list
 
     :return: True if support of feature set is indicated by given flags.
         False otherwise
     :rtype: bool
     """
 
-    return not False in (has_feature(flags, feat) for feat in featureset)
+    if feature_set not in REQUIRED_FEATURES:
+        raise Exception('Unknown feature set "{}"'.format(feature_set))
+
+    return not False in (supports_feature(flags, feat) for feat in REQUIRED_FEATURES[feature_set])
 
 
 def get_supported_feature_sets(flags) -> List[str]:
     """
-    Returns the latest supported feature set indicated by given flags.
+    Returns the all supported micro architecture levels indicated by given flags.
 
-    :param flags: Set of flags to check for feature set support
+    :param flags: Set of flags to check for micro architecture level support
     :type flags: set
 
-    :return: The latest feature set that is supported or None if no
-        known feature set is supported
+    :return: The all micro architecture level that are supported or an empty list if no
+        known micro architecture level is supported
     :rtype: str
     """
 
-    # find all defined features sets
-    all_feature_sets = []
-    for one_variable in globals():
-        m = re.match(r'(X86_64[\w_]*)_REQUIRED_FEATURES', one_variable)
-        if m is not None:
-            all_feature_sets.append((one_variable, m.group(1).lower().replace("_", "-")))
-    all_feature_sets.sort()
-
     # find all supported feature sets
     supported = []
-    for one_feature_set in all_feature_sets:
-        if supports_feature_set(flags, globals()[one_feature_set[0]]):
-            supported.append(one_feature_set[1])
+    for one_feature_set in sorted(REQUIRED_FEATURES.keys()):
+        if supports_feature_set(flags, one_feature_set):
+            supported.append(one_feature_set)
     return supported
 
 

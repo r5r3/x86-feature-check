@@ -31,11 +31,14 @@ class Test_X86Levels(unittest.TestCase):
     LEVELMAP = {
         'AMD_Athlon_X2_4000+':             'x86-64',
         'AMD_Athlon_5370':                 'x86-64-v2',
-        'AMD_FX8120':                      'x86-64-v2',
+        'AMD_FX-8120':                     'x86-64-v2',
+        'AMD_Ryzen_Threadripper_1920X':    'x86-64-v3',
         'AMD_Opteron_6174':                'x86-64',
         'AMD_EPYC_7351':                   'x86-64-v3',
         'AMD_EPYC_7401':                   'x86-64-v3',
+        'AMD_EPYC_7501':                   'x86-64-v3',
         'AMD_EPYC_7352':                   'x86-64-v3',
+        'AMD_EPYC_7402P':                  'x86-64-v3',
         'AMD_EPYC_7452':                   'x86-64-v3',
         'Intel_Core_i5-4300U':             'x86-64-v3',
         'Intel_Core_i7-4790':              'x86-64-v3',
@@ -49,11 +52,20 @@ class Test_X86Levels(unittest.TestCase):
         'Intel_Xeon_X5550':                'x86-64-v2',
         'Intel_Xeon_L5640':                'x86-64-v2',
         'Intel_Xeon_X5650':                'x86-64-v2',
+        'Intel_Xeon_E5-2630':              'x86-64-v2',
         'Intel_Xeon_E5-2650':              'x86-64-v2',
+        'Intel_Xeon_E5-2660':              'x86-64-v2',
+        'Intel_Xeon_E5-2670':              'x86-64-v2',
+        'Intel_Xeon_E5-4650L':             'x86-64-v2',
+        'Intel_Xeon_E5-2643v2':            'x86-64-v2',
         'Intel_Xeon_E5-2670v2':            'x86-64-v2',
         'Intel_Xeon_E3-1220v3':            'x86-64-v3',
+        'Intel_Xeon_E5-2620v3':            'x86-64-v3',
         'Intel_Xeon_E5-2623v3':            'x86-64-v3',
         'Intel_Xeon_E5-2650v3':            'x86-64-v3',
+        'Intel_Xeon_E5-2680v3':            'x86-64-v3',
+        'Intel_Xeon_E5-4627v3':            'x86-64-v3',
+        'Intel_Xeon_E5-2620v4':            'x86-64-v3',
         'Intel_Xeon_E5-2630v4':            'x86-64-v3',
         'Intel_Xeon_E5-2680v4':            'x86-64-v3',
         'Intel_Xeon_Scalable_4114_Silver': 'x86-64-v4',
@@ -72,7 +84,7 @@ class Test_X86Levels(unittest.TestCase):
                 flags = x86_feature_check.extract_cpu_flags(cpuinfo)
                 self.assertTrue(isinstance(flags, set))
 
-                feature_set = x86_feature_check.get_max_feature_set(flags)
+                feature_set = x86_feature_check.get_max_architecture_level(flags)
                 self.assertTrue(isinstance(feature_set, str))
 
                 self.assertEqual(
